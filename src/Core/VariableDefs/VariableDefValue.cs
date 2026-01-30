@@ -4,9 +4,13 @@ namespace BfevLibrary.Core;
 
 public class VariableDefValue
 {
+    public bool? Bool { get; set; }
+    
     public int? Int { get; set; }
 
     public float? Float { get; set; }
+
+    public bool[]? BoolArray { get; set; }
 
     public int[]? IntArray { get; set; }
 
@@ -20,12 +24,19 @@ public class VariableDefValue
     {
         // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (type) {
+            case ContainerDataType.Bool:
+                Bool = (int)value != 0;
+                break;
             case ContainerDataType.Int:
                 Int = (int)value;
                 break;
             case ContainerDataType.Float:
                 Float = (float)value;
                 break;
+            case ContainerDataType.BoolArray: {
+                BoolArray = reader.ReadObjectsPtr(new bool[count], () => reader.ReadInt32() != 0, value);
+                break;
+            }
             case ContainerDataType.IntArray: {
                 IntArray = reader.ReadObjectsPtr(new int[count], reader.ReadInt32, value);
                 break;
@@ -34,11 +45,18 @@ public class VariableDefValue
                 FloatArray = reader.ReadObjectsPtr(new float[count], reader.ReadSingle, value);
                 break;
             }
+            default:
+                throw new NotSupportedException($"Unsupported variable type: {type}");
         }
     }
 
     protected Action? WriteData(BfevWriter writer)
     {
+        if (Bool != null) {
+            writer.Write(Bool.Value ? 1L : 0L);
+            return null;
+        }
+        
         if (Int != null) {
             writer.Write((ulong)Int);
             return null;
@@ -49,7 +67,7 @@ public class VariableDefValue
             return null;
         }
         
-        if (IntArray != null || FloatArray != null) {
+        if (BoolArray != null || IntArray != null || FloatArray != null) {
             return writer.ReservePtr();
         }
 
@@ -60,8 +78,10 @@ public class VariableDefValue
     {
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return type switch {
+            ContainerDataType.Bool => 1,
             ContainerDataType.Int => 1,
             ContainerDataType.Float => 1,
+            ContainerDataType.BoolArray => BoolArray!.Length,
             ContainerDataType.IntArray => IntArray!.Length,
             ContainerDataType.FloatArray => FloatArray!.Length,
             _ => throw new NotSupportedException($"Unsupported variable type: {type}")
@@ -70,12 +90,20 @@ public class VariableDefValue
 
     public ContainerDataType GetDataType()
     {
+        if (Bool != null) {
+            return ContainerDataType.Bool;
+        }
+        
         if (Int != null) {
             return ContainerDataType.Int;
         }
 
         if (Float != null) {
             return ContainerDataType.Float;
+        }
+
+        if (BoolArray != null) {
+            return ContainerDataType.BoolArray;
         }
 
         if (IntArray != null) {

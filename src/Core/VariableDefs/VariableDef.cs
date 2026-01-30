@@ -32,7 +32,12 @@ public class VariableDef : VariableDefValue
         writer.ReserveBlockWriter("VariableDefData", () => {
             ptr();
 
-            if (IntArray is not null) {
+            if (BoolArray is not null) {
+                foreach (bool boolean in BoolArray) {
+                    writer.Write(boolean ? 1 : 0);
+                }
+            }
+            else if (IntArray is not null) {
                 foreach (int s32 in IntArray) {
                     writer.Write((long)s32);
                 }
