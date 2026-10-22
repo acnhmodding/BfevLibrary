@@ -81,7 +81,8 @@ public class Actor : IBfevDataBlock
         void CheckAction(ref Action? action, bool condition, bool register)
         {
             if (action == null) {
-                action = condition ? writer.ReservePtrIf(condition, register: register) : null;
+                Action reserved = writer.ReservePtrIf(condition, register: register);
+                action = condition ? reserved : null;
             }
             else {
                 action();
