@@ -6,7 +6,7 @@ namespace BfevLibrary.Core;
 
 public class EntryPoint : IBfevDataBlock
 {
-    public List<short> SubFlowEventIndices { get; set; }
+    public List<short> SubFlowEventIndices { get; set; } = new();
 
     public RadixTree<VariableDef>? Variables { get; set; }
 
@@ -46,7 +46,7 @@ public class EntryPoint : IBfevDataBlock
     public void Write(BfevWriter writer)
     {
         Action insertSubFlowEventIndicesPtr = writer.ReservePtrIf(SubFlowEventIndices.Count > 0, register: true);
-        Action insertVariableDefDictPtr = writer.ReservePtrIf(Variables is { Count: > 0 }, register: true);
+        Action insertVariableDefDictPtr = writer.ReservePtrIf(Variables is { Count: > 0 });
         Action insertVariableDefsPtr = writer.ReservePtrIf(Variables is { Count: > 0 }, register: true);
         writer.Write((ushort)SubFlowEventIndices.Count);
         writer.Write((ushort)(Variables?.Count ?? 0));
@@ -64,6 +64,8 @@ public class EntryPoint : IBfevDataBlock
             }
 
             if (Variables is not { Count: > 0 }) {
+                // Empty entrypoints reserve space in place of the variable-definition block.
+                writer.Seek(0x18, SeekOrigin.Current);
                 return;
             }
 
@@ -76,11 +78,7 @@ public class EntryPoint : IBfevDataBlock
                 variableDef.Write(writer);
             }
             
-            writer.WriteReserved("VariableDefData", alignment: 8);
-            
-            // The size for each entry point is sizeof(event_idx_array)
-            // rounded up to the nearest multiple of 8 + 0x18 bytes.
-            writer.Seek(0x18, SeekOrigin.Current);
+            writer.WriteReserved("VariableDefData", remove: true, alignment: 8);
         });
     }
 }

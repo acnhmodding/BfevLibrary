@@ -39,12 +39,12 @@ public class VariableDef : VariableDefValue
             }
             else if (IntArray is not null) {
                 foreach (int s32 in IntArray) {
-                    writer.Write((long)s32);
+                    writer.Write(s32);
                 }
             }
             else if (FloatArray is not null) {
-                foreach (int f32 in FloatArray) {
-                    writer.Write((long)f32);
+                foreach (float f32 in FloatArray) {
+                    writer.Write(f32);
                 }
             }
         });

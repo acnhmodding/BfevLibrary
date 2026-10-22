@@ -23,6 +23,7 @@ public enum ContainerDataType : byte
 public class Container : RadixTree<ContainerItem>, IBfevDataBlock
 {
     public Container() { }
+    public Container(IEnumerable<KeyValuePair<string, ContainerItem>> values) : base(values) { }
     public Container(BfevReader reader)
     {
         Read(reader);

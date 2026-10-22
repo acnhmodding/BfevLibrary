@@ -70,7 +70,7 @@ public class Actor : IBfevDataBlock
 
         CheckAction(ref insertActionsPtr, Actions.Count > 0, register: true);
         CheckAction(ref insertQueriesPtr, Queries.Count > 0, register: true);
-        CheckAction(ref insertParamsPtr, true, register: false);
+        CheckAction(ref insertParamsPtr, Parameters.Count > 0, register: false);
 
         writer.Write((ushort)Actions.Count);
         writer.Write((ushort)Queries.Count);
@@ -81,7 +81,7 @@ public class Actor : IBfevDataBlock
         void CheckAction(ref Action? action, bool condition, bool register)
         {
             if (action == null) {
-                action = writer.ReservePtrIf(condition, register: register);
+                action = condition ? writer.ReservePtrIf(condition, register: register) : null;
             }
             else {
                 action();
@@ -94,19 +94,21 @@ public class Actor : IBfevDataBlock
     {
         writer.Align(8);
 
-        if (insertParamsPtr == null) {
-            long pos = writer.BaseStream.Position;
-            insertParamsPtr = () => {
-                writer.RegisterPtr();
-                writer.Write(pos);
-            };
-        }
-        else {
-            insertParamsPtr();
-            insertParamsPtr = null;
-        }
+        if (Parameters.Count > 0) {
+            if (insertParamsPtr == null) {
+                long pos = writer.BaseStream.Position;
+                insertParamsPtr = () => {
+                    writer.RegisterPtr();
+                    writer.Write(pos);
+                };
+            }
+            else {
+                insertParamsPtr();
+                insertParamsPtr = null;
+            }
 
-        Parameters.Write(writer);
+            Parameters.Write(writer);
+        }
 
         if (Actions.Count > 0) {
             writer.Align(8);

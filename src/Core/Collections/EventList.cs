@@ -51,14 +51,50 @@ public class EventList : ObservableCollection<Event>
         foreach ((_, var entryPoint) in _parent.EntryPoints) {
             entryPoint.SubFlowEventIndices.Clear();
 
-            List<int> indices = new();
-            Event @event = Items[entryPoint.EventIndex];
-            @event.GetIndices(indices, entryPoint.EventIndex, -1);
+            if (entryPoint.EventIndex == -1)
+                continue;
 
-            foreach (var index in indices) {
+
+            foreach (var index in GetEntryPointEventIndices(entryPoint.EventIndex)) {
                 if (Items[index] is SubflowEvent) {
                     entryPoint.SubFlowEventIndices.Add((short)index);
                 }
+            }
+        }
+    }
+
+    private IEnumerable<int> GetEntryPointEventIndices(int index)
+    {
+        Stack<(int Index, int Join)> pending = new();
+        HashSet<int> visited = new();
+        pending.Push((index, -1));
+        while (pending.TryPop(out var item)) {
+            int current = item.Index;
+            if (current < 0 || current == ushort.MaxValue || current == item.Join || !visited.Add(current)) {
+                continue;
+            }
+            yield return current;
+            switch (Items[current]) {
+                case ActionEvent action:
+                    pending.Push((action.NextEventIndex, item.Join));
+                    break;
+                case SwitchEvent query:
+                    foreach (int child in query.SwitchCases.Select(branch => (int)branch.EventIndex).Distinct().Reverse()) {
+                        pending.Push((child, item.Join));
+                    }
+                    break;
+                case ForkEvent fork:
+                    pending.Push((fork.JoinEventIndex, item.Join));
+                    foreach (short child in fork.ForkEventIndicies.AsEnumerable().Reverse()) {
+                        pending.Push((child, fork.JoinEventIndex));
+                    }
+                    break;
+                case JoinEvent join:
+                    pending.Push((join.NextEventIndex, item.Join));
+                    break;
+                case SubflowEvent call:
+                    pending.Push((call.NextEventIndex, item.Join));
+                    break;
             }
         }
     }

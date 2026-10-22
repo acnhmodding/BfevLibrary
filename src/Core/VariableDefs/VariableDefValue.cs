@@ -31,7 +31,7 @@ public class VariableDefValue
                 Int = (int)value;
                 break;
             case ContainerDataType.Float:
-                Float = (float)value;
+                Float = BitConverter.Int32BitsToSingle((int)value);
                 break;
             case ContainerDataType.BoolArray: {
                 BoolArray = reader.ReadObjectsPtr(new bool[count], () => reader.ReadInt32() != 0, value);
@@ -63,7 +63,8 @@ public class VariableDefValue
         }
         
         if (Float != null) {
-            writer.Write((ulong)Float);
+            writer.Write(Float.Value);
+            writer.Write(0U);
             return null;
         }
         
