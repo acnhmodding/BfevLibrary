@@ -1,5 +1,7 @@
 # Bfev Library
 
+This is the [ACNH Modding fork](https://github.com/acnhmodding/BfevLibrary), distributed as `AcnhModding.BfevLibrary`. It includes serialization fixes used by EventFlowToCode. The assembly name and C# namespaces remain `BfevLibrary`.
+
 Nintendo **B**inary ca**f**e **Ev**ent **Fl**ow Libray | Based on [evfl](https://github.com/zeldamods/evfl) by [Léo Lam](https://github.com/leoetlino)
 
 *BfevLibrary has been tested to parse, serialize (json), deserialize (json), and write every BFEV file found in **Breath of the Wild** byte-perfectly.*
@@ -58,18 +60,24 @@ string json = bfev.ToJson(format: true);
 
 ### Install
 
-[![NuGet](https://img.shields.io/nuget/v/BfevLibrary.svg)](https://www.nuget.org/packages/BfevLibrary) [![NuGet](https://img.shields.io/nuget/dt/BfevLibrary.svg)](https://www.nuget.org/packages/BfevLibrary)
+[![NuGet](https://img.shields.io/nuget/vpre/AcnhModding.BfevLibrary.svg)](https://www.nuget.org/packages/AcnhModding.BfevLibrary)
 
 #### NuGet
 ```powershell
-Install-Package BfevLibrary
+Install-Package AcnhModding.BfevLibrary -PreRelease
 ```
 
 #### Build From Source
 ```batch
-git clone https://github.com/NCF-Library/BfevLibrary.git
-dotnet build BfevLibrary
+git clone https://github.com/acnhmodding/BfevLibrary.git
+dotnet build BfevLibrary/src/BfevLibrary.csproj
 ```
+
+### Publishing
+
+The `nuget.yml` workflow publishes version tags such as `v0.12.2-acnh.1` using NuGet Trusted Publishing. Configure the policy for repository owner `acnhmodding`, repository `BfevLibrary`, workflow file `nuget.yml`, no environment, and package scope `AcnhModding.BfevLibrary`. Allow publishing new packages and package versions.
+
+Set the GitHub repository Actions variable `NUGET_USER` to the nuget.org username that created the policy (not an email address). No API key secret is needed. Push the workflow and package changes before pushing a version tag; the tag determines the package version. Publish the fork before publishing an EventFlowToCode package that depends on it.
 
 ### Credits
 

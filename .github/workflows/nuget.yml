@@ -1,43 +1,39 @@
-name: "Deploy BfevLibrary to NuGet"
+name: Publish BfevLibrary to NuGet
 
 on:
   push:
     tags:
       - "v*"
 
-env:
-  nuget: "https://api.nuget.org/v3/index.json"
+permissions:
+  contents: read
 
 jobs:
-  deploy:
-    name: "Deploy BfevLibrary"
+  publish:
     runs-on: ubuntu-latest
 
-    env:
-      csproj: "BfevLibrary"
-      build: "${{ github.workspace }}/build"
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: "Install DotNET"
-        uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "7.0.x"
+          dotnet-version: "10.0.x"
 
-      - name: "Restore packages"
-        run: dotnet restore src/${{ env.csproj }}.csproj
+      - name: Pack
+        shell: bash
+        run: dotnet pack src/BfevLibrary.csproj --configuration Release -p:Version="${GITHUB_REF_NAME#v}" --output artifacts
 
-      - name: "Build project"
-        run: dotnet build src/${{ env.csproj }}.csproj --no-restore -c Release
+      - name: Authenticate to NuGet
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
 
-      - name: "Get Version"
-        id: version
-        uses: battila7/get-version-action@v2
-
-      - name: "Pack project"
-        run: dotnet pack src/${{ env.csproj }}.csproj --no-restore -c Release -p:PackageVersion=${{ steps.version.outputs.version-without-v }} --output ${{ env.build }}
-
-      - name: "Push package"
-        run: dotnet nuget push ${{ env.build }}/*.nupkg -k ${{ secrets.nuget_auth }} -s ${{ env.nuget }}
+      - name: Publish
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json

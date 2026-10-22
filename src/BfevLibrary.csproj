@@ -4,13 +4,15 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Title>BfevLibrary</Title>
+    <PackageId>AcnhModding.BfevLibrary</PackageId>
+    <Version>0.12.2-acnh.1</Version>
+    <Title>BfevLibrary (ACNH Modding fork)</Title>
     <Authors>Arch Leaders</Authors>
-    <Description>Nintendo Binary cafe Event Flow Libray | Based on evfl by Léo Lam</Description>
+    <Description>ACNH Modding fork of BfevLibrary with EventFlowToCode serialization fixes. Based on BfevLibrary by Arch Leaders and evfl by Léo Lam.</Description>
     <Copyright>(c) Arch Leaders</Copyright>
-    <PackageProjectUrl>https://github.com/NCF-Library/BfevLibrary</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/acnhmodding/BfevLibrary</PackageProjectUrl>
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/NCF-Library/BfevLibrary</RepositoryUrl>
+    <RepositoryUrl>https://github.com/acnhmodding/BfevLibrary</RepositoryUrl>
     <PackageTags>bfevfl;evfl;event flows;botw;nintendo;zelda</PackageTags>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
